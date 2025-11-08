@@ -7,21 +7,25 @@ import {
   StyleSheet,
   Alert,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationProp } from '@react-navigation/native';
-import { NavigationStackParamList } from '../types';
+import { NavigationStackParamList, User } from '../types';
+import auth from '../services/auth';
 
 interface SignUpScreenProps {
   navigation: NavigationProp<NavigationStackParamList, 'SignUp'>;
+  onAuthSuccess?: (user: User) => void;
 }
 
-export default function SignUpScreen({ navigation }: SignUpScreenProps) {
+export default function SignUpScreen({ navigation, onAuthSuccess }: SignUpScreenProps) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSignUp = () => {
     if (!firstName || !lastName || !email || !password || !confirmPassword) {
@@ -137,8 +141,34 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
             <View style={styles.dividerLine} />
           </View>
 
-          <TouchableOpacity style={styles.googleButton}>
-            <Text style={styles.googleButtonText}>Continue with Google</Text>
+          <TouchableOpacity 
+            style={styles.googleButton}
+            onPress={async () => {
+              if (isLoading) return;
+              
+              setIsLoading(true);
+              try {
+                const user = await auth.signInAndSave();
+                if (user) {
+                  console.log('Google Sign-In successful:', user);
+                  onAuthSuccess?.(user);
+                } else {
+                  Alert.alert('Error', 'Sign-in was cancelled');
+                }
+              } catch (e) {
+                console.warn('Google sign in flow error', e);
+                Alert.alert('Error', 'Google sign-in failed. Please try again.');
+              } finally {
+                setIsLoading(false);
+              }
+            }}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.googleButtonText}>Continue with Google</Text>
+            )}
           </TouchableOpacity>
 
           <View style={styles.terms}>

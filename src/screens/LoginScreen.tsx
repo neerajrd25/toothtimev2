@@ -4,28 +4,32 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Alert,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationProp } from '@react-navigation/native';
-import { NavigationStackParamList } from '../types';
+import { NavigationStackParamList, User } from '../types';
+import theme, { makeStyles } from '../theme';
+import auth from '../services/auth';
 
 interface LoginScreenProps {
   navigation: NavigationProp<NavigationStackParamList, 'Login'>;
+  onAuthSuccess?: (user: User) => void;
 }
 
-export default function LoginScreen({ navigation }: LoginScreenProps) {
+export default function LoginScreen({ navigation, onAuthSuccess }: LoginScreenProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = () => {
     if (!email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
-    
+
     // For now, just show success message (no database)
     Alert.alert('Success', 'Login functionality will be implemented soon!');
   };
@@ -33,6 +37,8 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
   const goToSignUp = () => {
     navigation.navigate('SignUp');
   };
+
+  const styles = useLocalStyles;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -76,8 +82,8 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-            <Text style={styles.loginButtonText}>Sign In</Text>
+          <TouchableOpacity style={theme.common.buttonPrimary} onPress={handleLogin}>
+            <Text style={theme.common.buttonPrimaryText}>Sign In</Text>
           </TouchableOpacity>
 
           <View style={styles.divider}>
@@ -86,8 +92,34 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             <View style={styles.dividerLine} />
           </View>
 
-          <TouchableOpacity style={styles.googleButton}>
-            <Text style={styles.googleButtonText}>Continue with Google</Text>
+          <TouchableOpacity
+            style={theme.common.buttonOutlined}
+            onPress={async () => {
+              if (isLoading) return;
+              
+              setIsLoading(true);
+              try {
+                const user = await auth.signInAndSave();
+                if (user) {
+                  console.log('Google Sign-In successful:', user);
+                  onAuthSuccess?.(user);
+                } else {
+                  Alert.alert('Error', 'Sign-in was cancelled');
+                }
+              } catch (e) {
+                console.warn('Google sign in flow error', e);
+                Alert.alert('Error', 'Google sign-in failed. Please try again.');
+              } finally {
+                setIsLoading(false);
+              }
+            }}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#2E7D32" />
+            ) : (
+              <Text style={theme.common.buttonOutlinedText}>Continue with Google</Text>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -104,114 +136,84 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useLocalStyles = makeStyles(({ colors, spacing, typography, common }) => ({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
   },
   scrollContent: {
     flexGrow: 1,
-    padding: 24,
+    padding: spacing.md,
   },
   header: {
     alignItems: 'center',
-    marginTop: 40,
-    marginBottom: 40,
+    marginTop: spacing.lg,
+    marginBottom: spacing.lg,
   },
   toothIcon: {
     fontSize: 64,
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   title: {
-    fontSize: 28,
+    fontSize: typography.h1,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.text,
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: typography.body,
+    color: colors.muted,
     textAlign: 'center',
   },
   form: {
     flex: 1,
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: spacing.md,
   },
   label: {
-    fontSize: 16,
+    fontSize: typography.body,
     fontWeight: '600',
-    color: '#333',
+    color: colors.text,
     marginBottom: 8,
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    backgroundColor: '#F8F9FA',
+    ...common.input,
   },
   forgotPassword: {
     alignSelf: 'flex-end',
-    marginBottom: 32,
+    marginBottom: spacing.lg,
   },
   forgotPasswordText: {
     fontSize: 14,
-    color: '#4A90E2',
+    color: colors.primary,
     fontWeight: '500',
-  },
-  loginButton: {
-    backgroundColor: '#4A90E2',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  loginButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
   },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: spacing.lg,
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: colors.border,
   },
   dividerText: {
-    marginHorizontal: 16,
-    fontSize: 14,
-    color: '#666',
-  },
-  googleButton: {
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-  },
-  googleButtonText: {
-    color: '#333',
-    fontSize: 16,
-    fontWeight: '500',
+    marginHorizontal: spacing.md,
+    fontSize: typography.small,
+    color: colors.muted,
   },
   footer: {
     alignItems: 'center',
-    marginTop: 32,
+    marginTop: spacing.lg,
   },
   footerText: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.body,
+    color: colors.muted,
   },
   signUpLink: {
-    color: '#4A90E2',
+    color: colors.primary,
     fontWeight: '600',
   },
-});
+}));

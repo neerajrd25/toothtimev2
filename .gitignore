@@ -157,3 +157,13 @@ GoogleService-Info.plist
 firebase-config.js
 *.p12
 *.mobileprovision
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Keystore files
+*.keystore
+*.jks
+keystore.properties
