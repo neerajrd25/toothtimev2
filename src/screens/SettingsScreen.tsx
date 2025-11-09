@@ -2,9 +2,16 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { colors } from '../theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { NavigationStackParamList } from '../types';
 import auth from '../services/auth';
 
+type SettingsNavigationProp = StackNavigationProp<NavigationStackParamList, 'Profile'>;
+
 const SettingsScreen: React.FC = () => {
+  const navigation = useNavigation<SettingsNavigationProp>();
+
   const handleSignOut = async () => {
     Alert.alert(
       'Sign Out',
@@ -39,7 +46,7 @@ const SettingsScreen: React.FC = () => {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Account</Text>
-          <SettingItem title="Profile" />
+          <SettingItem title="Profile" onPress={() => navigation.navigate('Profile')} />
           <SettingItem title="Preferences" />
           <SettingItem title="Notifications" />
         </View>

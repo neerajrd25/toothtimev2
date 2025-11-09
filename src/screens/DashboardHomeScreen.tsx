@@ -22,6 +22,7 @@ import { colors } from '../theme';
 const DashboardHomeScreen: React.FC = () => {
   const navigation = useNavigation();
   const [user, setUser] = useState<User | null>(null);
+  const [userName, setUserName] = useState<string>('');
   const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([]);
   const [todaysPatients, setTodaysPatients] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -42,6 +43,18 @@ const DashboardHomeScreen: React.FC = () => {
     try {
       const currentUser = await auth.getCurrentUser();
       setUser(currentUser);
+      
+      // Load user profile to get the name from database
+      if (currentUser) {
+        const profileData = await db.getUserProfile(currentUser.id);
+        if (profileData) {
+          // Get name from profile or fallback to auth user name
+          const displayName = currentUser.name || '';
+          setUserName(displayName);
+        } else {
+          setUserName(currentUser.name || '');
+        }
+      }
     } catch (error) {
       console.error('Failed to load user data:', error);
     } finally {
@@ -213,7 +226,7 @@ const DashboardHomeScreen: React.FC = () => {
             {/* Welcome Message */}
             <View style={styles.welcomeSection}>
               <Text style={styles.welcomeText}>
-                Welcome back{user?.name ? `, ${user.name.split(' ')[0]}` : ''}!
+                Welcome back{userName ? `, Dr. ${userName.split(' ')[0]}` : ''}!
               </Text>
               <Text style={styles.welcomeSubtext}>
                 Ready to make some smiles brighter today?

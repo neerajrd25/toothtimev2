@@ -10,6 +10,7 @@ import DashboardHomeScreen from './DashboardHomeScreen';
 import PatientsScreen from './PatientsScreen';
 import CalendarScreen from './CalendarScreen';
 import SettingsScreen from './SettingsScreen';
+import ProfileScreen from './ProfileScreen';
 import AddPatientScreen from './AddPatientScreen';
 import PatientDetailScreen from './PatientDetailScreen';
 import AddTreatmentScreen from './AddTreatmentScreen';
@@ -18,6 +19,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 const Tab = createBottomTabNavigator<DashboardTabParamList>();
 const PatientsStack = createStackNavigator();
+const SettingsStack = createStackNavigator();
 
 const PatientsStackScreen: React.FC = () => (
   <PatientsStack.Navigator screenOptions={{ headerShown: false }}>
@@ -36,6 +38,13 @@ const PatientsStackScreen: React.FC = () => (
       component={ScheduleAppointmentScreen as any} 
     />
   </PatientsStack.Navigator>
+);
+
+const SettingsStackScreen: React.FC = () => (
+  <SettingsStack.Navigator screenOptions={{ headerShown: false }}>
+    <SettingsStack.Screen name="SettingsMain" component={SettingsScreen} />
+    <SettingsStack.Screen name="Profile" component={ProfileScreen as any} />
+  </SettingsStack.Navigator>
 );
 
 const DashboardScreen: React.FC = () => {
@@ -105,7 +114,7 @@ const DashboardScreen: React.FC = () => {
       />
       <Tab.Screen
         name="Settings"
-        component={SettingsScreen}
+        component={SettingsStackScreen}
         options={{
           tabBarLabel: 'Settings',
           tabBarIcon: ({ color, focused }) => (

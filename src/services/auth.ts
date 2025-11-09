@@ -76,10 +76,13 @@ async function getCurrentUser(): Promise<User | null> {
     
     if (!user) return null;
     
+    // Check database for updated user info (name might be updated in profile)
+    const dbUser = await db.getUserById(user.id);
+    
     return {
       id: user.id,
-      name: user.name,
-      email: user.email,
+      name: dbUser?.name || user.name,
+      email: dbUser?.email || user.email,
       photo: user.photo,
     };
   } catch (e) {

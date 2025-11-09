@@ -4,6 +4,7 @@ export type NavigationStackParamList = {
   Login: undefined;
   SignUp: undefined;
   Dashboard: undefined;
+  Profile: undefined;
   PatientDetail: { patientId: string };
   AddTreatment: { patientId: string };
   ScheduleAppointment: { patientId: string; treatmentId: string };

@@ -17,7 +17,10 @@ const openDB = async (): Promise<SQLiteDatabase> => {
         id TEXT PRIMARY KEY NOT NULL,
         name TEXT,
         email TEXT,
-        photo TEXT
+        photo TEXT,
+        phone TEXT,
+        qualification TEXT,
+        experience TEXT
       );`
     );
       // Ensure patients table exists
@@ -484,11 +487,78 @@ const getUpcomingAppointments = async (): Promise<any[]> => {
   }
 };
 
+// User Profile Functions
+const getUserProfile = async (userId: string): Promise<{ qualification: string; experience: string; phone: string } | null> => {
+  try {
+    const db = await openDB();
+    const [result] = await db.executeSql(
+      'SELECT qualification, experience, phone FROM users WHERE id = ? LIMIT 1;',
+      [userId]
+    );
+    if (result.rows.length > 0) {
+      const row = result.rows.item(0);
+      return {
+        qualification: row.qualification || '',
+        experience: row.experience || '',
+        phone: row.phone || '',
+      };
+    }
+    return null;
+  } catch (e) {
+    console.warn('getUserProfile error', e);
+    return null;
+  }
+};
+
+const updateUserProfile = async (
+  userId: string,
+  profile: {
+    name: string;
+    email: string;
+    phone: string;
+    qualification: string;
+    experience: string;
+  }
+): Promise<boolean> => {
+  try {
+    const db = await openDB();
+    
+    // First check if columns exist, if not add them
+    const [checkResult] = await db.executeSql('PRAGMA table_info(users);');
+    const columns = [];
+    for (let i = 0; i < checkResult.rows.length; i++) {
+      columns.push(checkResult.rows.item(i).name);
+    }
+    
+    if (!columns.includes('phone')) {
+      await db.executeSql('ALTER TABLE users ADD COLUMN phone TEXT;');
+    }
+    if (!columns.includes('qualification')) {
+      await db.executeSql('ALTER TABLE users ADD COLUMN qualification TEXT;');
+    }
+    if (!columns.includes('experience')) {
+      await db.executeSql('ALTER TABLE users ADD COLUMN experience TEXT;');
+    }
+    
+    // Update the user profile
+    await db.executeSql(
+      'UPDATE users SET name = ?, email = ?, phone = ?, qualification = ?, experience = ? WHERE id = ?;',
+      [profile.name, profile.email, profile.phone, profile.qualification, profile.experience, userId]
+    );
+    return true;
+  } catch (e) {
+    console.warn('updateUserProfile error', e);
+    return false;
+  }
+};
+
 export default {
   openDB,
   saveUser,
   getUserById,
   getAllUsers,
+  getUserProfile,
+  updateUserProfile,
   createPatient,
   getPatients,
   getTodaysPatients,
