@@ -8,6 +8,9 @@ import {
   TouchableOpacity,
   FlatList,
   Alert,
+  Linking,
+  Platform,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -19,9 +22,10 @@ import { colors } from '../theme';
 const DashboardHomeScreen: React.FC = () => {
   const navigation = useNavigation();
   const [user, setUser] = useState<User | null>(null);
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([]);
   const [todaysPatients, setTodaysPatients] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [menuVisible, setMenuVisible] = useState<string | null>(null);
 
   useEffect(() => {
     loadUserData();
@@ -30,6 +34,7 @@ const DashboardHomeScreen: React.FC = () => {
   useFocusEffect(
     React.useCallback(() => {
       loadTodaysPatients();
+      loadUpcomingAppointments();
     }, [])
   );
 
@@ -53,10 +58,13 @@ const DashboardHomeScreen: React.FC = () => {
     }
   };
 
-  const loadTodaysAppointments = async () => {
-    // For now, we'll keep this empty as requested
-    // In the future, this would load from database or API
-    setAppointments([]);
+  const loadUpcomingAppointments = async () => {
+    try {
+      const appointments = await db.getUpcomingAppointments();
+      setUpcomingAppointments(appointments);
+    } catch (error) {
+      console.error('Failed to load upcoming appointments:', error);
+    }
   };
   
   const formatDateForDisplay = (dbDate: string | null): string => {
@@ -84,6 +92,44 @@ const DashboardHomeScreen: React.FC = () => {
       month: 'long',
       day: 'numeric',
     });
+  };
+
+  const handleReschedule = (appointmentId: string) => {
+    setMenuVisible(null);
+    Alert.alert('Reschedule', 'Reschedule feature coming soon!');
+  };
+
+  const handleCancel = (appointmentId: string) => {
+    setMenuVisible(null);
+    Alert.alert('Cancel', 'Cancel appointment feature coming soon!');
+  };
+
+  const handleNotify = async (appointment: any) => {
+    setMenuVisible(null);
+    if (!appointment.patient_phone) {
+      Alert.alert('Error', 'Patient phone number not available');
+      return;
+    }
+
+    const message = `Dear ${appointment.patient_name},\n\nReminder: Your appointment for ${appointment.treatment_type} is scheduled.\n\nDate: ${formatDateForDisplay(appointment.appointment_date)}\nTime: ${appointment.appointment_time}\nDuration: ${appointment.duration_minutes} minutes\n\nPlease arrive 10 minutes early.\n\nThank you,\nToothTime Dental Clinic`;
+
+    const url = `sms:${appointment.patient_phone}${Platform.OS === 'ios' ? '&' : '?'}body=${encodeURIComponent(message)}`;
+    
+    try {
+      const canOpen = await Linking.canOpenURL(url);
+      if (canOpen) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert('Error', 'Unable to open SMS app');
+      }
+    } catch (error) {
+      console.error('SMS error:', error);
+      Alert.alert('Error', 'Failed to open SMS app');
+    }
+  };
+
+  const toggleMenu = (appointmentId: string) => {
+    setMenuVisible(menuVisible === appointmentId ? null : appointmentId);
   };
 
   const renderAppointmentItem = ({ item }: { item: Appointment }) => (
@@ -136,7 +182,16 @@ const DashboardHomeScreen: React.FC = () => {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.appName}>ToothTime</Text>
+          <View style={styles.appNameContainer}>
+            <View style={styles.logoIcon}>
+              <Image 
+                source={require('../assets/images/tooth_icon.png')} 
+                style={styles.logoImage}
+                resizeMode="contain"
+              />
+            </View>
+            <Text style={styles.appName}>ToothTime</Text>
+          </View>
           <Text style={styles.dateText}>{formatDate()}</Text>
         </View>
         <TouchableOpacity onPress={handleProfilePress} style={styles.profileContainer}>
@@ -153,70 +208,107 @@ const DashboardHomeScreen: React.FC = () => {
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Welcome Message */}
-        <View style={styles.welcomeSection}>
-          <Text style={styles.welcomeText}>
-            Welcome back{user?.name ? `, ${user.name.split(' ')[0]}` : ''}!
-          </Text>
-          <Text style={styles.welcomeSubtext}>
-            Ready to make some smiles brighter today?
-          </Text>
-        </View>
+        <TouchableWithoutFeedback onPress={() => setMenuVisible(null)}>
+          <View>
+            {/* Welcome Message */}
+            <View style={styles.welcomeSection}>
+              <Text style={styles.welcomeText}>
+                Welcome back{user?.name ? `, ${user.name.split(' ')[0]}` : ''}!
+              </Text>
+              <Text style={styles.welcomeSubtext}>
+                Ready to make some smiles brighter today?
+              </Text>
+            </View>
 
-        {/* Today's Appointments */}
+        {/* Upcoming Appointments */}
         <View style={styles.appointmentsSection}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Today's Patients</Text>
+            <Text style={styles.sectionTitle}>Upcoming Appointments</Text>
             <Text style={styles.appointmentCount}>
-              {todaysPatients.length} patient{todaysPatients.length !== 1 ? 's' : ''}
+              {upcomingAppointments.length} appointment{upcomingAppointments.length !== 1 ? 's' : ''}
             </Text>
           </View>
 
           <View style={styles.appointmentsList}>
-            {todaysPatients.length > 0 ? (
-              todaysPatients.map((patient) => (
-                <View key={patient.id} style={styles.patientCard}>
-                  <View style={styles.patientInfo}>
-                    <Text style={styles.patientCardName}>{patient.name}</Text>
-                    {patient.treatment_type && (
+            {upcomingAppointments.length > 0 ? (
+              upcomingAppointments.map((appointment) => (
+                <View key={appointment.id} style={styles.appointmentCard}>
+                  <View style={styles.appointmentHeader}>
+                    <View style={styles.appointmentPatientInfo}>
+                      <Text style={styles.appointmentPatientName}>{appointment.patient_name}</Text>
                       <View style={styles.treatmentBadgeSmall}>
-                        <Text style={styles.treatmentBadgeSmallText}>{patient.treatment_type}</Text>
+                        <Text style={styles.treatmentBadgeSmallText}>{appointment.treatment_type}</Text>
                       </View>
-                    )}
+                    </View>
+                    <TouchableOpacity 
+                      style={styles.menuButton}
+                      onPress={() => toggleMenu(appointment.id)}
+                    >
+                      <Text style={styles.menuIcon}>⋮</Text>
+                    </TouchableOpacity>
                   </View>
-                  {patient.phone && (
-                    <Text style={styles.patientCardContact}>{patient.phone}</Text>
+                  <View style={styles.appointmentDetailsRow}>
+                    <Text style={styles.appointmentDateTime}>
+                      📅 {formatDateForDisplay(appointment.appointment_date)} • 🕐 {appointment.appointment_time}
+                    </Text>
+                    <Text style={styles.appointmentDuration}>
+                      ⏱️ {appointment.duration_minutes} min
+                    </Text>
+                  </View>
+                  {appointment.patient_phone && (
+                    <Text style={styles.patientCardContact}>📱 {appointment.patient_phone}</Text>
+                  )}
+                  
+                  {/* Dropdown Menu */}
+                  {menuVisible === appointment.id && (
+                    <View style={styles.dropdownMenu}>
+                      <TouchableOpacity 
+                        style={styles.menuOption}
+                        onPress={() => handleReschedule(appointment.id)}
+                      >
+                        <Text style={styles.menuOptionIcon}>🔄</Text>
+                        <Text style={styles.menuOptionText}>Reschedule</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity 
+                        style={styles.menuOption}
+                        onPress={() => handleCancel(appointment.id)}
+                      >
+                        <Text style={styles.menuOptionIcon}>❌</Text>
+                        <Text style={styles.menuOptionText}>Cancel</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity 
+                        style={styles.menuOption}
+                        onPress={() => handleNotify(appointment)}
+                      >
+                        <Text style={styles.menuOptionIcon}>📱</Text>
+                        <Text style={styles.menuOptionText}>Send Notification</Text>
+                      </TouchableOpacity>
+                    </View>
                   )}
                 </View>
               ))
             ) : (
               <View style={styles.emptyState}>
-                <Text style={styles.emptyTitle}>No patients scheduled today</Text>
-                <Text style={styles.emptySubtitle}>Your day is free!</Text>
+                <Text style={styles.emptyTitle}>No upcoming appointments</Text>
+                <Text style={styles.emptySubtitle}>Schedule appointments from patient details</Text>
               </View>
             )}
           </View>
         </View>
 
-        {/* Quick Actions */}
-        <View style={styles.quickActions}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
-          <View style={styles.actionButtons}>
-            <TouchableOpacity 
-              style={styles.actionButton}
-              onPress={() => (navigation as any).navigate('Patients', { screen: 'AddPatient' })}
-            >
-              <Text style={styles.actionButtonText}>+ Add Patient</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.actionButton, styles.actionButtonSecondary]}
-              onPress={() => (navigation as any).navigate('Patients')}
-            >
-              <Text style={[styles.actionButtonText, styles.actionButtonTextSecondary]}>View All Patients</Text>
-            </TouchableOpacity>
+        {/* Quick Actions - Removed */}
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </ScrollView>
+
+      {/* Floating Action Button */}
+      <TouchableOpacity 
+        style={styles.fab}
+        onPress={() => (navigation as any).navigate('Patients', { screen: 'AddPatient' })}
+      >
+        <Text style={styles.fabIcon}>👤</Text>
+        <Text style={styles.fabPlus}>+</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -247,6 +339,29 @@ const styles = StyleSheet.create({
   },
   headerLeft: {
     flex: 1,
+  },
+  appNameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  logoIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  logoImage: {
+    width: 24,
+    height: 24,
   },
   appName: {
     fontSize: 24,
@@ -445,6 +560,116 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 11,
     fontWeight: '500',
+  },
+  appointmentCard: {
+    backgroundColor: '#f8f9fa',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.primary,
+  },
+  appointmentHeader: {
+    marginBottom: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  appointmentPatientInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+    flex: 1,
+  },
+  menuButton: {
+    padding: 4,
+    marginLeft: 8,
+  },
+  menuIcon: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#666',
+    lineHeight: 24,
+  },
+  appointmentPatientName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginRight: 8,
+  },
+  appointmentDetailsRow: {
+    marginBottom: 6,
+  },
+  appointmentDateTime: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  appointmentDuration: {
+    fontSize: 13,
+    color: '#999',
+  },
+  dropdownMenu: {
+    position: 'absolute',
+    top: 40,
+    right: 10,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 5,
+    minWidth: 180,
+    zIndex: 1000,
+  },
+  menuOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  menuOptionIcon: {
+    fontSize: 18,
+    marginRight: 12,
+  },
+  menuOptionText: {
+    fontSize: 15,
+    color: '#333',
+    fontWeight: '500',
+  },
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 8,
+  },
+  fabIcon: {
+    fontSize: 20,
+    position: 'absolute',
+    top: 10,
+    left: 20,
+  },
+  fabPlus: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: '600',
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
   },
 });
 

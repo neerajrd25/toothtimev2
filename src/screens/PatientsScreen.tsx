@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import db from '../services/db';
@@ -12,10 +12,30 @@ type Props = {
 
 const PatientsScreen: React.FC<Props> = ({ navigation }) => {
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
 
   const loadPatients = async () => {
     const list = await db.getPatients();
     setPatients(list as any);
+    setFilteredPatients(list as any);
+  };
+  
+  // Filter patients based on search query
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    if (!query.trim()) {
+      setFilteredPatients(patients);
+      return;
+    }
+    
+    const lowercaseQuery = query.toLowerCase();
+    const filtered = patients.filter(patient => 
+      patient.name.toLowerCase().includes(lowercaseQuery) ||
+      (patient.phone && patient.phone.toLowerCase().includes(lowercaseQuery)) ||
+      (patient.email && patient.email.toLowerCase().includes(lowercaseQuery))
+    );
+    setFilteredPatients(filtered);
   };
   
   // Convert YYYY-MM-DD to DD-MM-YYYY for display
@@ -44,15 +64,32 @@ const PatientsScreen: React.FC<Props> = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search by name, phone, or email..."
+          value={searchQuery}
+          onChangeText={handleSearch}
+          clearButtonMode="while-editing"
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
+      </View>
+
       <View style={styles.content}>
-        {patients.length === 0 ? (
-          <Text style={styles.subtitle}>No patients yet. Tap + to add one.</Text>
+        {filteredPatients.length === 0 ? (
+          <Text style={styles.subtitle}>
+            {searchQuery ? 'No patients found matching your search.' : 'No patients yet. Tap + to add one.'}
+          </Text>
         ) : (
           <FlatList
-            data={patients}
+            data={filteredPatients}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <View style={styles.patientCard}>
+              <TouchableOpacity 
+                style={styles.patientCard}
+                onPress={() => navigation.navigate('PatientDetail', { patientId: item.id })}
+              >
                 <View style={styles.patientHeader}>
                   <Text style={styles.patientName}>{item.name}</Text>
                   {(item as any).treatment_type && (
@@ -68,7 +105,7 @@ const PatientsScreen: React.FC<Props> = ({ navigation }) => {
                   <Text style={styles.visitDateLabel}>First Visit:</Text>
                   <Text style={styles.visitDate}>{formatDateForDisplay((item as any).first_visit_date)}</Text>
                 </View>
-              </View>
+              </TouchableOpacity>
             )}
           />
         )}
@@ -91,6 +128,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  searchContainer: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e1e5e9',
+  },
+  searchInput: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#e1e5e9',
   },
   content: {
     flex: 1,

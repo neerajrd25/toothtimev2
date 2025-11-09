@@ -27,7 +27,7 @@ const AddPatientScreen: React.FC<Props> = ({ navigation }) => {
   const [notes, setNotes] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [treatmentType, setTreatmentType] = useState<'Root Canal' | 'Implants' | ''>('');
+  // const [treatmentType, setTreatmentType] = useState<'Root Canal' | 'Implants' | ''>('');
 
   const styles = localStyles;
   
@@ -60,10 +60,10 @@ const AddPatientScreen: React.FC<Props> = ({ navigation }) => {
       Alert.alert('Validation', 'Please enter patient name');
       return;
     }
-    if (!treatmentType) {
-      Alert.alert('Validation', 'Please select a treatment type');
-      return;
-    }
+    // if (!treatmentType) {
+    //   Alert.alert('Validation', 'Please select a treatment type');
+    //   return;
+    // }
 
     const dbDate = convertToDbFormat(selectedDate);
 
@@ -74,7 +74,7 @@ const AddPatientScreen: React.FC<Props> = ({ navigation }) => {
       email: email.trim() || null,
       notes: notes.trim() || null,
       first_visit_date: dbDate,
-      treatment_type: treatmentType || null,
+      // treatment_type: treatmentType || null,
     };
 
     const ok = await db.createPatient(patient as any);
@@ -121,7 +121,7 @@ const AddPatientScreen: React.FC<Props> = ({ navigation }) => {
             </View>
           </TouchableOpacity>
 
-          <Text style={styles.label}>Treatment Type</Text>
+          {/* <Text style={styles.label}>Treatment Type</Text>
           <View style={styles.treatmentRow}>
             <TouchableOpacity
               style={[styles.treatmentBtn, treatmentType === 'Root Canal' && styles.treatmentBtnActive]}
@@ -135,7 +135,7 @@ const AddPatientScreen: React.FC<Props> = ({ navigation }) => {
             >
               <Text style={[styles.treatmentBtnText, treatmentType === 'Implants' && styles.treatmentBtnTextActive]}>Implants</Text>
             </TouchableOpacity>
-          </View>
+          </View> */}
 
           <TouchableOpacity style={theme.common.buttonPrimary} onPress={handleSave}>
             <Text style={theme.common.buttonPrimaryText}>Save Patient</Text>

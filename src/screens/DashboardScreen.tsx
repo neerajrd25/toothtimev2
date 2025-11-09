@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { colors } from '../theme';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { DashboardTabParamList } from '../types';
+import { CommonActions } from '@react-navigation/native';
 
 // Import screens
 import DashboardHomeScreen from './DashboardHomeScreen';
@@ -10,6 +11,9 @@ import PatientsScreen from './PatientsScreen';
 import CalendarScreen from './CalendarScreen';
 import SettingsScreen from './SettingsScreen';
 import AddPatientScreen from './AddPatientScreen';
+import PatientDetailScreen from './PatientDetailScreen';
+import AddTreatmentScreen from './AddTreatmentScreen';
+import ScheduleAppointmentScreen from './ScheduleAppointmentScreen';
 import { createStackNavigator } from '@react-navigation/stack';
 
 const Tab = createBottomTabNavigator<DashboardTabParamList>();
@@ -19,6 +23,18 @@ const PatientsStackScreen: React.FC = () => (
   <PatientsStack.Navigator screenOptions={{ headerShown: false }}>
     <PatientsStack.Screen name="PatientsMain" component={PatientsScreen} />
     <PatientsStack.Screen name="AddPatient" component={AddPatientScreen} />
+    <PatientsStack.Screen 
+      name="PatientDetail" 
+      component={PatientDetailScreen as any} 
+    />
+    <PatientsStack.Screen 
+      name="AddTreatment" 
+      component={AddTreatmentScreen as any} 
+    />
+    <PatientsStack.Screen 
+      name="ScheduleAppointment" 
+      component={ScheduleAppointmentScreen as any} 
+    />
   </PatientsStack.Navigator>
 );
 
@@ -63,6 +79,19 @@ const DashboardScreen: React.FC = () => {
             <TabIcon name="Patients" color={color} focused={focused} />
           ),
         }}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            e.preventDefault();
+            navigation.dispatch(
+              CommonActions.navigate({
+                name: 'Patients',
+                params: {
+                  screen: 'PatientsMain',
+                },
+              })
+            );
+          },
+        })}
       />
       <Tab.Screen
         name="Calendar"

@@ -8,6 +8,7 @@ import {
   Alert,
   ScrollView,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationProp } from '@react-navigation/native';
@@ -55,7 +56,11 @@ export default function SignUpScreen({ navigation, onAuthSuccess }: SignUpScreen
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={styles.toothIcon}>🦷</Text>
+          <Image 
+            source={require('../assets/images/tooth_icon.png')} 
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
           <Text style={styles.title}>Create Account</Text>
           <Text style={styles.subtitle}>Join ToothTime and start your dental care journey</Text>
         </View>
@@ -207,8 +212,9 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 32,
   },
-  toothIcon: {
-    fontSize: 48,
+  logoImage: {
+    width: 64,
+    height: 64,
     marginBottom: 16,
   },
   title: {

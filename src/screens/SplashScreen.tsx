@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet, Animated, Easing, Image } from 'react-native';
 
 interface SplashScreenProps {
   onFinish: () => void;
@@ -56,7 +56,11 @@ const SplashScreen = ({ onFinish }: SplashScreenProps) => {
               transform: [{ scale: logoScale }],
             },
           ]}>
-          <Text style={styles.toothIcon}>🦷</Text>
+          <Image 
+            source={require('../assets/images/tooth_icon.png')} 
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
         </Animated.View>
         
         <Animated.View style={{ opacity: textOpacity }}>
@@ -88,21 +92,19 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: 20,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 6,
+    shadowRadius: 8,
     elevation: 8,
   },
-  toothIcon: {
-    fontSize: 48,
+  logoImage: {
+    width: 80,
+    height: 80,
   },
   appName: {
     fontSize: 32,
