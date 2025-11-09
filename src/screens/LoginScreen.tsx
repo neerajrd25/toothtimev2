@@ -116,7 +116,7 @@ export default function LoginScreen({ navigation, onAuthSuccess }: LoginScreenPr
             disabled={isLoading}
           >
             {isLoading ? (
-              <ActivityIndicator color="#2E7D32" />
+              <ActivityIndicator color={theme.colors.primary} />
             ) : (
               <Text style={theme.common.buttonOutlinedText}>Continue with Google</Text>
             )}

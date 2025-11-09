@@ -21,7 +21,7 @@
 - **Sign-out functionality** - Available in Settings screen, returns to Login
 
 ### 🎨 **UI Features**
-- **Professional color scheme** - Green primary colors (#2E7D32) for dental theme
+- **Professional color scheme** - Blue primary color (#4A90E2) for the app theme
 - **Custom tab icons** - Simple geometric shapes for navigation tabs
 - **Loading states** - Proper loading indicators during Google Sign-In
 - **Empty states** - Friendly messages when no appointments exist
@@ -76,7 +76,7 @@ The foundation is solid - you can now focus on adding business logic and data ma
 ## 🏥 **Dental Clinic Ready**
 
 The UI theme and layout are specifically designed for a dental practice:
-- Professional green color scheme
+- Professional blue color scheme
 - Clean, medical-grade aesthetic  
 - Appointment-focused dashboard layout
 - Patient-centric navigation structure

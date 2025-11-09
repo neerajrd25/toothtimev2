@@ -10,18 +10,28 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import auth, { User } from '../services/auth';
+import db from '../services/db';
 import { Appointment } from '../types';
+import { colors } from '../theme';
 
 const DashboardHomeScreen: React.FC = () => {
+  const navigation = useNavigation();
   const [user, setUser] = useState<User | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [todaysPatients, setTodaysPatients] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadUserData();
-    loadTodaysAppointments();
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadTodaysPatients();
+    }, [])
+  );
 
   const loadUserData = async () => {
     try {
@@ -34,10 +44,29 @@ const DashboardHomeScreen: React.FC = () => {
     }
   };
 
+  const loadTodaysPatients = async () => {
+    try {
+      const patients = await db.getTodaysPatients();
+      setTodaysPatients(patients);
+    } catch (error) {
+      console.error('Failed to load today\'s patients:', error);
+    }
+  };
+
   const loadTodaysAppointments = async () => {
     // For now, we'll keep this empty as requested
     // In the future, this would load from database or API
     setAppointments([]);
+  };
+  
+  const formatDateForDisplay = (dbDate: string | null): string => {
+    if (!dbDate) return '-';
+    const parts = dbDate.split('-');
+    if (parts.length === 3) {
+      const [year, month, day] = parts;
+      return `${day}-${month}-${year}`;
+    }
+    return dbDate;
   };
 
   const handleProfilePress = () => {
@@ -75,7 +104,7 @@ const DashboardHomeScreen: React.FC = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'scheduled':
-        return '#4CAF50';
+        return colors.primary;
       case 'completed':
         return '#2196F3';
       case 'cancelled':
@@ -137,23 +166,34 @@ const DashboardHomeScreen: React.FC = () => {
         {/* Today's Appointments */}
         <View style={styles.appointmentsSection}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Today's Appointments</Text>
+            <Text style={styles.sectionTitle}>Today's Patients</Text>
             <Text style={styles.appointmentCount}>
-              {appointments.length} appointment{appointments.length !== 1 ? 's' : ''}
+              {todaysPatients.length} patient{todaysPatients.length !== 1 ? 's' : ''}
             </Text>
           </View>
 
           <View style={styles.appointmentsList}>
-            {appointments.length > 0 ? (
-              <FlatList
-                data={appointments}
-                renderItem={renderAppointmentItem}
-                keyExtractor={(item) => item.id}
-                scrollEnabled={false}
-                ItemSeparatorComponent={() => <View style={styles.separator} />}
-              />
+            {todaysPatients.length > 0 ? (
+              todaysPatients.map((patient) => (
+                <View key={patient.id} style={styles.patientCard}>
+                  <View style={styles.patientInfo}>
+                    <Text style={styles.patientCardName}>{patient.name}</Text>
+                    {patient.treatment_type && (
+                      <View style={styles.treatmentBadgeSmall}>
+                        <Text style={styles.treatmentBadgeSmallText}>{patient.treatment_type}</Text>
+                      </View>
+                    )}
+                  </View>
+                  {patient.phone && (
+                    <Text style={styles.patientCardContact}>{patient.phone}</Text>
+                  )}
+                </View>
+              ))
             ) : (
-              renderEmptyAppointments()
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyTitle}>No patients scheduled today</Text>
+                <Text style={styles.emptySubtitle}>Your day is free!</Text>
+              </View>
             )}
           </View>
         </View>
@@ -162,11 +202,17 @@ const DashboardHomeScreen: React.FC = () => {
         <View style={styles.quickActions}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.actionButtons}>
-            <TouchableOpacity style={styles.actionButton}>
-              <Text style={styles.actionButtonText}>Add Patient</Text>
+            <TouchableOpacity 
+              style={styles.actionButton}
+              onPress={() => (navigation as any).navigate('Patients', { screen: 'AddPatient' })}
+            >
+              <Text style={styles.actionButtonText}>+ Add Patient</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton}>
-              <Text style={styles.actionButtonText}>Schedule Appointment</Text>
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.actionButtonSecondary]}
+              onPress={() => (navigation as any).navigate('Patients')}
+            >
+              <Text style={[styles.actionButtonText, styles.actionButtonTextSecondary]}>View All Patients</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -205,7 +251,7 @@ const styles = StyleSheet.create({
   appName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#2E7D32',
+    color: colors.primary,
   },
   dateText: {
     fontSize: 14,
@@ -225,7 +271,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#2E7D32',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -293,7 +339,7 @@ const styles = StyleSheet.create({
   timeText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#2E7D32',
+    color: colors.primary,
   },
   appointmentDetails: {
     flex: 1,
@@ -349,7 +395,7 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
-    backgroundColor: '#2E7D32',
+    backgroundColor: colors.primary,
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -359,6 +405,45 @@ const styles = StyleSheet.create({
   actionButtonText: {
     color: '#fff',
     fontSize: 16,
+    fontWeight: '500',
+  },
+  actionButtonSecondary: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  actionButtonTextSecondary: {
+    color: colors.primary,
+  },
+  patientCard: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e1e5e9',
+  },
+  patientInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  patientCardName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginRight: 8,
+  },
+  patientCardContact: {
+    fontSize: 14,
+    color: '#666',
+  },
+  treatmentBadgeSmall: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  treatmentBadgeSmallText: {
+    color: '#fff',
+    fontSize: 11,
     fontWeight: '500',
   },
 });

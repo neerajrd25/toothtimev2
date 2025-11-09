@@ -1,13 +1,77 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
+import db from '../services/db';
+import { Patient } from '../types';
+import theme from '../theme';
 
-const PatientsScreen: React.FC = () => {
+type Props = {
+  navigation: any;
+};
+
+const PatientsScreen: React.FC<Props> = ({ navigation }) => {
+  const [patients, setPatients] = useState<Patient[]>([]);
+
+  const loadPatients = async () => {
+    const list = await db.getPatients();
+    setPatients(list as any);
+  };
+  
+  // Convert YYYY-MM-DD to DD-MM-YYYY for display
+  const formatDateForDisplay = (dbDate: string | null): string => {
+    if (!dbDate) return '-';
+    const parts = dbDate.split('-');
+    if (parts.length === 3) {
+      const [year, month, day] = parts;
+      return `${day}-${month}-${year}`;
+    }
+    return dbDate;
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadPatients();
+    }, [])
+  );
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.content}>
+      <View style={styles.header}>
         <Text style={styles.title}>Patients</Text>
-        <Text style={styles.subtitle}>Patient management coming soon...</Text>
+        <TouchableOpacity style={styles.addBtn} onPress={() => navigation.navigate('AddPatient')}>
+          <Text style={styles.addBtnText}>+</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.content}>
+        {patients.length === 0 ? (
+          <Text style={styles.subtitle}>No patients yet. Tap + to add one.</Text>
+        ) : (
+          <FlatList
+            data={patients}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <View style={styles.patientCard}>
+                <View style={styles.patientHeader}>
+                  <Text style={styles.patientName}>{item.name}</Text>
+                  {(item as any).treatment_type && (
+                    <View style={styles.treatmentBadge}>
+                      <Text style={styles.treatmentBadgeText}>{(item as any).treatment_type}</Text>
+                    </View>
+                  )}
+                </View>
+                {(item.phone || item.email) && (
+                  <Text style={styles.patientContact}>{item.phone || item.email}</Text>
+                )}
+                <View style={styles.patientFooter}>
+                  <Text style={styles.visitDateLabel}>First Visit:</Text>
+                  <Text style={styles.visitDate}>{formatDateForDisplay((item as any).first_visit_date)}</Text>
+                </View>
+              </View>
+            )}
+          />
+        )}
       </View>
     </SafeAreaView>
   );
@@ -18,22 +82,110 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f9fa',
   },
+  header: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e1e5e9',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   content: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     padding: 20,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#2E7D32',
-    marginBottom: 16,
+    color: theme.colors.primary,
+  },
+  addBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: theme.colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addBtnText: {
+    color: '#fff',
+    fontSize: 24,
+    lineHeight: 24,
+    fontWeight: '700',
   },
   subtitle: {
     fontSize: 16,
     color: '#666',
     textAlign: 'center',
+  },
+  patientCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#e1e5e9',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  patientHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  patientName: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
+    flex: 1,
+  },
+  treatmentBadge: {
+    backgroundColor: theme.colors.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  treatmentBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  patientContact: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 8,
+  },
+  patientFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  visitDateLabel: {
+    fontSize: 13,
+    color: '#999',
+    marginRight: 6,
+  },
+  visitDate: {
+    fontSize: 13,
+    color: theme.colors.primary,
+    fontWeight: '600',
+  },
+  patientRow: {
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#e1e5e9',
+  },
+  patientMeta: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4,
   },
 });
 

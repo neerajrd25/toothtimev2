@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
+import { colors } from '../theme';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { DashboardTabParamList } from '../types';
 
@@ -8,15 +9,25 @@ import DashboardHomeScreen from './DashboardHomeScreen';
 import PatientsScreen from './PatientsScreen';
 import CalendarScreen from './CalendarScreen';
 import SettingsScreen from './SettingsScreen';
+import AddPatientScreen from './AddPatientScreen';
+import { createStackNavigator } from '@react-navigation/stack';
 
 const Tab = createBottomTabNavigator<DashboardTabParamList>();
+const PatientsStack = createStackNavigator();
+
+const PatientsStackScreen: React.FC = () => (
+  <PatientsStack.Navigator screenOptions={{ headerShown: false }}>
+    <PatientsStack.Screen name="PatientsMain" component={PatientsScreen} />
+    <PatientsStack.Screen name="AddPatient" component={AddPatientScreen} />
+  </PatientsStack.Navigator>
+);
 
 const DashboardScreen: React.FC = () => {
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#2E7D32',
+  tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: '#666',
         tabBarStyle: {
           backgroundColor: '#fff',
@@ -45,7 +56,7 @@ const DashboardScreen: React.FC = () => {
       />
       <Tab.Screen
         name="Patients"
-        component={PatientsScreen}
+        component={PatientsStackScreen}
         options={{
           tabBarLabel: 'Patients',
           tabBarIcon: ({ color, focused }) => (

@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { colors } from '../theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import auth from '../services/auth';
 
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#2E7D32',
+    color: colors.primary,
   },
   section: {
     backgroundColor: '#fff',
