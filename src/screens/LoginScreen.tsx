@@ -51,7 +51,7 @@ export default function LoginScreen({ navigation, onAuthSuccess }: LoginScreenPr
             resizeMode="contain"
           />
           <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>Sign in to your ToothTime account</Text>
+          <Text style={styles.subtitle}>Sign in to your dentist companion app</Text>
         </View>
 
         <View style={styles.form}>
