@@ -11,6 +11,7 @@ import {
   Linking,
   Platform,
   TouchableWithoutFeedback,
+  StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -192,6 +193,7 @@ const DashboardHomeScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>

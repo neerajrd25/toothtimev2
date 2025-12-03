@@ -4,6 +4,7 @@ import { colors } from '../theme';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { DashboardTabParamList } from '../types';
 import { CommonActions } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Import screens
 import DashboardHomeScreen from './DashboardHomeScreen';
@@ -48,19 +49,21 @@ const SettingsStackScreen: React.FC = () => (
 );
 
 const DashboardScreen: React.FC = () => {
+  const insets = useSafeAreaInsets();
+  
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-  tabBarActiveTintColor: colors.primary,
+        tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: '#666',
         tabBarStyle: {
           backgroundColor: '#fff',
           borderTopWidth: 1,
           borderTopColor: '#e1e5e9',
-          paddingBottom: 8,
           paddingTop: 8,
-          height: 70,
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
+          height: 60 + (insets.bottom > 0 ? insets.bottom : 8),
         },
         tabBarLabelStyle: {
           fontSize: 12,

@@ -100,12 +100,28 @@ async function signInAndSave(): Promise<User | null> {
     
     if (!user) return null;
 
+    // Save or update user in database with profile fields
     const saved = await db.saveUser({
       id: user.id,
       name: user.name ?? '',
       email: user.email ?? '',
       photo: user.photo ?? '',
     });
+
+    if (saved) {
+      // Check if profile exists, if not create default profile entry
+      const profile = await db.getUserProfile(user.id);
+      if (!profile) {
+        // Initialize profile with default empty values
+        await db.updateUserProfile(user.id, {
+          name: user.name ?? '',
+          email: user.email ?? '',
+          phone: '',
+          qualification: '',
+          experience: '',
+        });
+      }
+    }
 
     return saved ? { 
       id: user.id, 

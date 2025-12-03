@@ -53,7 +53,7 @@ export default function SignUpScreen({ navigation, onAuthSuccess }: SignUpScreen
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Image 

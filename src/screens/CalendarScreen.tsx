@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, StatusBar } from 'react-native';
 import { colors } from '../theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const CalendarScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <View style={styles.content}>
         <Text style={styles.title}>Calendar</Text>
         <Text style={styles.subtitle}>Appointment scheduling coming soon...</Text>

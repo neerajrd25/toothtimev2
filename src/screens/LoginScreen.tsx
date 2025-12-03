@@ -42,7 +42,7 @@ export default function LoginScreen({ navigation, onAuthSuccess }: LoginScreenPr
   const styles = useLocalStyles;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Image 

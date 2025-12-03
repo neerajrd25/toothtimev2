@@ -62,20 +62,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       return;
     }
 
-    if (!email.trim()) {
-      Alert.alert('Validation Error', 'Please enter your email');
-      return;
-    }
-
     if (!phone.trim()) {
       Alert.alert('Validation Error', 'Please enter your phone number');
-      return;
-    }
-
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      Alert.alert('Validation Error', 'Please enter a valid email address');
       return;
     }
 
@@ -116,7 +104,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
           <Text style={styles.loadingText}>Loading profile...</Text>
@@ -126,7 +114,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Text style={styles.backButtonText}>‹ Back</Text>
@@ -152,17 +140,18 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email *</Text>
+            <Text style={styles.label}>Email (Google Account)</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, styles.disabledInput]}
               value={email}
-              onChangeText={setEmail}
               placeholder="Enter your email"
               placeholderTextColor="#999"
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
+              editable={false}
             />
+            <Text style={styles.helpText}>Email cannot be changed (linked to Google account)</Text>
           </View>
 
           <View style={styles.inputContainer}>
@@ -304,6 +293,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     backgroundColor: '#fff',
+  },
+  disabledInput: {
+    backgroundColor: '#f5f5f5',
+    color: '#999',
+  },
+  helpText: {
+    fontSize: 12,
+    color: '#666',
+    fontStyle: 'italic',
+    marginTop: 4,
   },
   saveButton: {
     backgroundColor: colors.primary,

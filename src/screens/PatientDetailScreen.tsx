@@ -69,7 +69,7 @@ const PatientDetailScreen: React.FC<Props> = ({ navigation, route }) => {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>Loading...</Text>
         </View>
@@ -79,7 +79,7 @@ const PatientDetailScreen: React.FC<Props> = ({ navigation, route }) => {
 
   if (!patient) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>Patient not found</Text>
         </View>
@@ -88,7 +88,7 @@ const PatientDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Text style={styles.backButtonText}>← Back</Text>

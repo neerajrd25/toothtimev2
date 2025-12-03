@@ -1,10 +1,10 @@
-import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, Alert, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import db from '../services/db';
+import { colors } from '../theme';
 import { Patient } from '../types';
-import theme from '../theme';
 
 type Props = {
   navigation: any;
@@ -57,6 +57,7 @@ const PatientsScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <View style={styles.header}>
         <Text style={styles.title}>Patients</Text>
         <TouchableOpacity style={styles.addBtn} onPress={() => navigation.navigate('AddPatient')}>
@@ -152,13 +153,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: theme.colors.primary,
+    color: colors.primary,
   },
   addBtn: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: theme.colors.primary,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -199,7 +200,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   treatmentBadge: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: colors.primary,
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
@@ -226,7 +227,7 @@ const styles = StyleSheet.create({
   },
   visitDate: {
     fontSize: 13,
-    color: theme.colors.primary,
+    color: colors.primary,
     fontWeight: '600',
   },
   patientRow: {

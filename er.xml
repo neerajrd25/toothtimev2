@@ -1,0 +1,82 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36" version="28.2.9">
+  <diagram name="Updated DentalCareSaaS ERD" id="XEGGCsoZMIVES4FVDu73">
+    <mxGraphModel dx="2406" dy="683" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="900" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="Clinic&#xa;clinic_id (PK)&#xa;name&#xa;address&#xa;primary_doctor_id (FK)" style="rounded=1;whiteSpace=wrap;fillColor=#E7F4FF;strokeColor=#005B96;" parent="1" vertex="1">
+          <mxGeometry x="30" y="60" width="180" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="3" value="User&#xa;user_id (PK)&#xa;name&#xa;email&#xa;phone&#xa;password_hash" style="rounded=1;whiteSpace=wrap;fillColor=#E2FFE7;strokeColor=#007246;" parent="1" vertex="1">
+          <mxGeometry x="340" y="60" width="180" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="4" value="Clinic_User_Map&#xa;map_id (PK)&#xa;clinic_id (FK)&#xa;user_id (FK)&#xa;role (primary_doctor, secondary_doctor, receptionist)" style="rounded=1;whiteSpace=wrap;fillColor=#FFFACC;strokeColor=#CCCC33;" parent="1" vertex="1">
+          <mxGeometry x="470" y="200" width="240" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="5" value="Patient&#xa;patient_id (PK)&#xa;clinic_id (FK)&#xa;name, dob, contact, address&#xa;created_by (FK)" style="rounded=1;whiteSpace=wrap;fillColor=#FFF3E6;strokeColor=#C77D00;" parent="1" vertex="1">
+          <mxGeometry x="140" y="410" width="180" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="6" value="Treatment&#xa;treatment_id (PK)&#xa;patient_id (FK)&#xa;clinic_id (FK)&#xa;doctor_id (FK)&#xa;treatment_type, notes&#xa;current_stage, total_stages&#xa;status, started_at, completed_at" style="rounded=1;whiteSpace=wrap;fillColor=#F0E6FF;strokeColor=#5A189A;" parent="1" vertex="1">
+          <mxGeometry x="-180" y="670" width="230" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="7" value="Appointment&#xa;appointment_id (PK)&#xa;patient_id (FK)&#xa;clinic_id (FK)&#xa;doctor_id (FK)&#xa;treatment_id (FK)&#xa;scheduled_time, status&#xa;treatment_stage&#xa;reminder_sent" style="rounded=1;whiteSpace=wrap;fillColor=#FFE6F7;strokeColor=#AD1457;" parent="1" vertex="1">
+          <mxGeometry x="460" y="590" width="240" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="8" value="WhatsApp_Reminder&#xa;reminder_id (PK)&#xa;appointment_id (FK)&#xa;sent_time, status" style="rounded=1;whiteSpace=wrap;fillColor=#E6FCFF;strokeColor=#0E7490;" parent="1" vertex="1">
+          <mxGeometry x="640" y="480" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="9" value="Audit_Log&#xa;log_id (PK)&#xa;user_id (FK)&#xa;clinic_id&#xa;action, entity, entity_id&#xa;details, timestamp" style="rounded=1;whiteSpace=wrap;fillColor=#F1F5F9;strokeColor=#535C68;" parent="1" vertex="1">
+          <mxGeometry x="640" y="330" width="180" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="10" value="Plan&#xa;plan_id (PK)&#xa;name, price&#xa;duration (monthly/yearly)&#xa;max_secondary_doctors, max_receptionists, max_patients&#xa;features (JSONB)&#xa;created_at" style="rounded=1;whiteSpace=wrap;fillColor=#E5F9E7;strokeColor=#228B22;" parent="1" vertex="1">
+          <mxGeometry x="-230" y="40" width="230" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="11" value="Subscription&#xa;subscription_id (PK)&#xa;clinic_id (FK)&#xa;plan_id (FK)&#xa;start_date, end_date, amount_paid&#xa;payment_status&#xa;razorpay_payment_id&#xa;created_at" style="rounded=1;whiteSpace=wrap;fillColor=#E7E5F9;strokeColor=#512DA8;" parent="1" vertex="1">
+          <mxGeometry x="-450" y="300" width="230" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;endArrow=block;endFill=1;" parent="1" source="2" target="3" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;endArrow=block;endFill=1;" parent="1" source="4" target="2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;endArrow=block;endFill=1;" parent="1" source="4" target="3" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;endArrow=block;endFill=1;" parent="1" source="5" target="2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;endArrow=block;endFill=1;" parent="1" source="6" target="5" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;endArrow=block;endFill=1;" parent="1" source="6" target="3" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;endArrow=block;endFill=1;" parent="1" source="7" target="5" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;endArrow=block;endFill=1;" parent="1" source="7" target="2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;endArrow=block;endFill=1;" parent="1" source="7" target="3" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;endArrow=block;endFill=1;" parent="1" source="7" target="6" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;endArrow=block;endFill=1;" parent="1" source="8" target="7" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;endArrow=block;endFill=1;" parent="1" source="9" target="3" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;endArrow=block;endFill=1;" parent="1" source="10" target="11" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=auto;html=1;endArrow=block;endFill=1;" parent="1" source="11" target="2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
