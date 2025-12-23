@@ -1,6 +1,6 @@
 /**
  * ToothTime React Native App
- * A dental care companion app
+ * A dentist companion app
  *
  * @format
  */

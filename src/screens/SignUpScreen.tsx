@@ -62,7 +62,7 @@ export default function SignUpScreen({ navigation, onAuthSuccess }: SignUpScreen
             resizeMode="contain"
           />
           <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Join ToothTime and start your dental care journey</Text>
+          <Text style={styles.subtitle}>Join ToothTime and enhance your dental practice</Text>
         </View>
 
         <View style={styles.form}>

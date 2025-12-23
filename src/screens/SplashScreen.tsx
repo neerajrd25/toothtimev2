@@ -65,7 +65,7 @@ const SplashScreen = ({ onFinish }: SplashScreenProps) => {
         
         <Animated.View style={{ opacity: textOpacity }}>
           <Text style={styles.appName}>ToothTime</Text>
-          <Text style={styles.tagline}>Your Dental Care Companion</Text>
+          <Text style={styles.tagline}>Your Dentist Companion</Text>
         </Animated.View>
       </View>
       
